@@ -10,6 +10,7 @@
     "start": "node src/server.js",
     "seed": "node src/seed.js",
     "check:checkout": "node src/check-checkout.js",
+    "reset": "node src/reset.js",
     "test": "node --test"
   },
   "keywords": [],

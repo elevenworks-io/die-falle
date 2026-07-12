@@ -3,3 +3,4 @@ data/
 .claude/guard-audit.jsonl
 .DS_Store
 guard-report.md
+.superpowers/

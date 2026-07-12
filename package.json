@@ -11,6 +11,8 @@
     "seed": "node src/seed.js",
     "check:checkout": "node src/check-checkout.js",
     "reset": "node src/reset.js",
+    "demo:guarded": "node src/demo.js guarded",
+    "demo:unguarded": "node src/demo.js unguarded",
     "test": "node --test"
   },
   "keywords": [],

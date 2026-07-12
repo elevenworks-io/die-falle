@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>guard — Live-Protokoll · Buchstäblich GmbH</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --bg: #0b0f14;
+    --panel: #10161d;
+    --border: #1f2b38;
+    --fg: #c9d6e3;
+    --dim: #5c6f81;
+    --blocked: #ff5566;
+    --injection: #ffa733;
+    --warned: #f2d94e;
+    --allowed: #6b7f91;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: var(--bg); color: var(--fg);
+    font-family: "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+  }
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex; align-items: baseline; justify-content: space-between;
+    flex-wrap: wrap; gap: 8px;
+  }
+  header h1 {
+    font-size: 15px; margin: 0; font-weight: 600; letter-spacing: 0.02em;
+    color: #e8eef5;
+  }
+  header h1 .brand { color: var(--dim); font-weight: 400; }
+  #status { font-size: 12px; color: var(--dim); display: flex; align-items: center; gap: 8px; }
+  #dot { width: 8px; height: 8px; border-radius: 50%; background: #2fbf71; display: inline-block; box-shadow: 0 0 6px #2fbf71; }
+  #dot.stale { background: #555; box-shadow: none; }
+  main { max-width: 980px; margin: 0 auto; padding: 16px 20px 60px; }
+  #empty { color: var(--dim); padding: 40px 0; text-align: center; font-size: 13px; }
+  .row {
+    display: grid;
+    grid-template-columns: 150px 150px 110px 1fr;
+    gap: 12px;
+    align-items: start;
+    padding: 8px 12px;
+    border-left: 3px solid transparent;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    background: var(--panel);
+  }
+  .row + .row { margin-top: 2px; }
+  .ts { color: var(--dim); white-space: nowrap; }
+  .badge {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    width: fit-content;
+  }
+  .tool { color: #8fa6bb; }
+  .detail { color: var(--fg); word-break: break-word; }
+  .detail .rule { color: var(--dim); }
+
+  .row.blocked { border-left-color: var(--blocked); }
+  .row.blocked .badge { background: rgba(255,85,102,0.15); color: var(--blocked); }
+
+  .row.injection-detected { border-left-color: var(--injection); }
+  .row.injection-detected .badge { background: rgba(255,167,51,0.18); color: var(--injection); }
+
+  .row.warned { border-left-color: var(--warned); }
+  .row.warned .badge { background: rgba(242,217,78,0.15); color: var(--warned); }
+
+  .row.allowed { border-left-color: var(--allowed); }
+  .row.allowed .badge { background: rgba(107,127,145,0.15); color: var(--allowed); }
+
+  @keyframes flash {
+    0%   { background: rgba(255,167,51,0.55); }
+    100% { background: var(--panel); }
+  }
+  .row.flash { animation: flash 1.1s ease-out; }
+</style>
+</head>
+<body>
+<header>
+  <h1>guard — Live-Protokoll <span class="brand">· Buchstäblich GmbH</span></h1>
+  <div id="status"><span id="dot"></span><span id="statusText">verbunden</span></div>
+</header>
+<main>
+  <div id="empty">Noch keine Ereignisse. Sobald ein Agent auf eine Falle trifft, erscheint hier ein Eintrag.</div>
+  <div id="log"></div>
+</main>
+<script>
+(function () {
+  const POLL_MS = 750;
+  const logEl = document.getElementById("log");
+  const emptyEl = document.getElementById("empty");
+  const dotEl = document.getElementById("dot");
+  const statusText = document.getElementById("statusText");
+
+  let seen = new Set();
+  let lastOk = true;
+
+  function fmtTime(ts) {
+    try {
+      const d = new Date(ts);
+      return d.toLocaleTimeString("de-DE", { hour12: false }) + "." + String(d.getMilliseconds()).padStart(3, "0");
+    } catch { return ts || ""; }
+  }
+
+  function eventClass(ev) {
+    if (ev.event === "blocked") return "blocked";
+    if (ev.event === "injection-detected") return "injection-detected";
+    if (ev.event === "warned") return "warned";
+    return "allowed";
+  }
+
+  function target(ev) {
+    if (ev.target) return ev.target;
+    if (ev.command) return ev.command;
+    if (ev.findings && ev.findings.length) {
+      return ev.findings.map((f) => f.ruleId || f.name).join(", ");
+    }
+    return "—";
+  }
+
+  function ruleOf(ev) {
+    return ev.ruleId || ev.rule || (ev.findings && ev.findings.map((f) => f.ruleId).join(", ")) || "";
+  }
+
+  function keyOf(ev, idx) {
+    return (ev.ts || "") + "|" + idx;
+  }
+
+  function render(events) {
+    if (events.length === 0) {
+      emptyEl.style.display = "block";
+      logEl.innerHTML = "";
+      seen = new Set();
+      return;
+    }
+    emptyEl.style.display = "none";
+
+    // Neueste zuerst.
+    const ordered = events.map((ev, i) => ({ ev, key: keyOf(ev, i) })).reverse();
+
+    logEl.innerHTML = "";
+    for (const { ev, key } of ordered) {
+      const row = document.createElement("div");
+      const cls = eventClass(ev);
+      row.className = "row " + cls;
+      if (!seen.has(key) && cls === "injection-detected") row.classList.add("flash");
+
+      const rule = ruleOf(ev);
+      row.innerHTML =
+        '<span class="ts">' + fmtTime(ev.ts) + '</span>' +
+        '<span class="badge">' + (ev.event || "?") + '</span>' +
+        '<span class="tool">' + (ev.tool || "—") + '</span>' +
+        '<span class="detail">' + escapeHtml(target(ev)) + (rule ? ' <span class="rule">(' + escapeHtml(rule) + ')</span>' : '') + '</span>';
+      logEl.appendChild(row);
+    }
+    seen = new Set(ordered.map((o) => o.key));
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  async function poll() {
+    try {
+      const res = await fetch("/api/audit", { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const events = await res.json();
+      render(events);
+      if (!lastOk) { dotEl.classList.remove("stale"); statusText.textContent = "verbunden"; }
+      lastOk = true;
+    } catch {
+      if (lastOk) { dotEl.classList.add("stale"); statusText.textContent = "keine Verbindung"; }
+      lastOk = false;
+    }
+  }
+
+  poll();
+  setInterval(poll, POLL_MS);
+})();
+</script>
+</body>
+</html>

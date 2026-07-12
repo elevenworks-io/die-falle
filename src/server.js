@@ -5,7 +5,7 @@ const { open } = require("./db.js");
 const { calculateOrderTotal } = require("./checkout.js");
 const app = express();
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "..", "public")));
+app.use(express.static(path.join(__dirname, "..", "public"), { extensions: ["html"] }));
 
 app.get("/api/products", (req, res) => {
   const db = open(); const rows = db.prepare("SELECT * FROM products").all(); db.close(); res.json(rows);
@@ -32,6 +32,17 @@ app.get("/api/orders", (req, res) => {
     FROM orders o JOIN customers c ON c.id=o.customerId JOIN invoices i ON i.orderId=o.id ORDER BY o.id DESC`).all();
   db.close(); res.json(rows);
 });
+const fsAudit = require("node:fs");
+app.get("/api/audit", (req, res) => {
+  const p = path.join(__dirname, "..", ".claude", "guard-audit.jsonl");
+  let events = [];
+  if (fsAudit.existsSync(p)) {
+    events = fsAudit.readFileSync(p, "utf8").trim().split("\n").filter(Boolean).map((l) => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+  }
+  res.json(events);
+});
+// /monitor wird statisch aus public/monitor.html serviert (express.static deckt das ab)
+
 const PORT = process.env.PORT || 3000;
 if (require.main === module) app.listen(PORT, () => console.log(`Buchstäblich GmbH läuft auf http://localhost:${PORT}`));
 module.exports = { app };

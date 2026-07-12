@@ -163,6 +163,47 @@ sauber gelöst. Die Frage ist nie 'sollen wir KI-Agenten einsetzen', sondern
 
 ---
 
+## Optional (nach dem Bug-Fix) — Der Kontrast: mit vs. ohne guard
+
+Dieses Segment macht den Nutzen **in Zahlen** greifbar — unabhängig davon,
+wie sich der Agent live verhalten hat. Es spielt eine feste Liste riskanter
+Aktionen (`.env`, `credentials.json`, `id_rsa`, `cat .env`, `printenv`) durch
+den echten `guard`-Hook.
+
+**Eintippen (Terminal 1):**
+
+```bash
+npm run demo:unguarded
+```
+
+**Zeigen:** Auf den Monitor — **fünf gelbe Zeilen** blitzen auf
+(`would-block`). Im Terminal: „5 riskante Aktionen erkannt · **0 verhindert**".
+
+**Sagen:** "Das ist eine Welt *ohne* Durchsetzung — `guard` im reinen
+Beobachtungs-Modus. Er *sieht* jeden dieser Zugriffe, protokolliert ihn — aber
+er lässt ihn durch. Genau so würde ein Team anfangen: erst mitschneiden, was
+ein Agent alles anfassen würde."
+
+**Eintippen:**
+
+```bash
+npm run demo:guarded
+```
+
+**Zeigen:** Dieselben fünf Zeilen, jetzt **rot** (`blocked`). Terminal:
+„5 riskante Aktionen versucht · **5 geblockt**".
+
+**Sagen:** "Und das ist dieselbe Szene mit Durchsetzung. Fünf erkannt, fünf
+verhindert. Der Unterschied zwischen 'wir wüssten es' und 'es passiert nicht'
+— das ist die Freigabe-Entscheidung, auf einer Zeile."
+
+> **Wichtig:** `demo:unguarded` lässt `guard` im monitor-Modus stehen. Vor
+> einer erneuten Live-Vorführung `npm run demo:guarded` **oder** `npm run reset`
+> ausführen, damit wieder enforce aktiv ist. `npm run reset` stellt ohnehin
+> alles her (Modus, DB, Audit-Log).
+
+---
+
 ## Minute 13–15 — Abschluss: Der Nachweis
 
 **Eintippen (Terminal 1, im Projektverzeichnis):**
@@ -181,6 +222,10 @@ könnt: nicht 'vertraut uns', sondern ein Protokoll — was wurde versucht,
 was wurde geblockt, was wurde nur erkannt und gewarnt. Genau diese
 Nachvollziehbarkeit ist es, was aus 'wir haben ein KI-Tool' ein 'wir haben
 ein kontrolliertes KI-Tool' macht."
+
+*(Tipp: Nach `demo:unguarded` zeigt `guard report` zusätzlich eine Sektion
+„Nicht durchgesetzt (monitor-Modus)" — „N erkannt, 0 verhindert". Das ist der
+Kontrast schwarz auf weiß im Nachweis-Dokument.)*
 
 **Schlusssatz:** "Alles, was ihr gerade gesehen habt — Monitor, Report,
 die vier Fallen — läuft komplett lokal, ohne dass Daten das Gerät

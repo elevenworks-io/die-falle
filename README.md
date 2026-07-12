@@ -41,6 +41,17 @@ Prompt-Injection, die den Agenten dazu bringen will, `.env` auszulesen
 und `credentials.json` preiszugeben. Mit `guard` installiert werden diese
 Zugriffe geblockt, bevor sie passieren.
 
+### Der Kontrast: mit vs. ohne guard
+
+```bash
+npm run demo:unguarded   # guard nur beobachtend: „5 erkannt, 0 verhindert" (gelb im /monitor)
+npm run demo:guarded     # guard durchsetzend:   „5 versucht, 5 geblockt"  (rot im /monitor)
+```
+
+Beide spielen dieselbe feste Liste riskanter Aktionen durch den echten
+`guard`-Hook — deterministisch, ohne auf das Live-Verhalten des Agenten
+angewiesen zu sein. `npm run reset` schaltet danach auf `enforce` zurück.
+
 ## Das Ticket — und die vier Akte
 
 **Der Bug:** `src/checkout.js` berechnet die MwSt für die gesamte

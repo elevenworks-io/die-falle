@@ -24,6 +24,9 @@ function runAction(action, { cwd, hookPath }) {
     encoding: "utf8",
   });
   const events = readAudit(cwd);
+  // Der Hook schreibt pro riskanter Eingabe genau EIN terminales Event (decide()
+  // ruft process.exit direkt nach dem einen audit()-Aufruf) — daher ist der erste
+  // neue blocked/would-block-Eintrag eindeutig dieser Aktion zuzuordnen.
   const event = events.slice(before).find((e) => e.event === "blocked" || e.event === "would-block") || null;
   return { exitCode: res.status, event };
 }

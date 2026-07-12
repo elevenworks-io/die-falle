@@ -17,10 +17,15 @@ const mode = arg === "guarded" ? "enforce" : "monitor";
 const hookPath = path.join(root, ".claude", "hooks", "guard", "pretool.js");
 const rulesPath = path.join(root, "guard.rules.json");
 
-// 1) Modus setzen (git-getrackt → npm run reset stellt enforce wieder her).
-const rules = JSON.parse(fs.readFileSync(rulesPath, "utf8"));
-rules.mode = mode;
-fs.writeFileSync(rulesPath, JSON.stringify(rules, null, 2) + "\n");
+// 1) Modus setzen — nur den mode-Wert chirurgisch ersetzen, damit die
+// hand-formatierte (git-getrackte) guard.rules.json unverändert bleibt und
+// `demo:guarded` sauber nach enforce zurückkehrt (kein Whitespace-Diff im tree).
+const rulesSrc = fs.readFileSync(rulesPath, "utf8");
+if (!/"mode":\s*"[a-z]+"/.test(rulesSrc)) {
+  console.error(`[demo] Kein "mode"-Feld in guard.rules.json gefunden — abgebrochen (sonst liefe die Demo im falschen Modus).`);
+  process.exit(1);
+}
+fs.writeFileSync(rulesPath, rulesSrc.replace(/("mode":\s*)"[a-z]+"/, `$1"${mode}"`));
 
 // 2) Audit-Log leeren, damit der Monitor genau diese Szene zeigt.
 fs.rmSync(auditPath(root), { force: true });

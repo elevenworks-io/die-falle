@@ -13,6 +13,7 @@
     --dim: #5c6f81;
     --blocked: #ff5566;
     --injection: #ffa733;
+    --wouldblock: #f2c94e;
     --warned: #f2d94e;
     --allowed: #6b7f91;
   }
@@ -71,6 +72,9 @@
   .row.injection-detected { border-left-color: var(--injection); }
   .row.injection-detected .badge { background: rgba(255,167,51,0.18); color: var(--injection); }
 
+  .row.would-block { border-left-color: var(--wouldblock); }
+  .row.would-block .badge { background: rgba(242,201,78,0.16); color: var(--wouldblock); }
+
   .row.warned { border-left-color: var(--warned); }
   .row.warned .badge { background: rgba(242,217,78,0.15); color: var(--warned); }
 
@@ -82,6 +86,12 @@
     100% { background: var(--panel); }
   }
   .row.flash { animation: flash 1.1s ease-out; }
+
+  @keyframes flashYellow {
+    0%   { background: rgba(242,201,78,0.5); }
+    100% { background: var(--panel); }
+  }
+  .row.would-block.flash { animation: flashYellow 1.1s ease-out; }
 </style>
 </head>
 <body>
@@ -113,6 +123,7 @@
 
   function eventClass(ev) {
     if (ev.event === "blocked") return "blocked";
+    if (ev.event === "would-block") return "would-block";
     if (ev.event === "injection-detected") return "injection-detected";
     if (ev.event === "warned") return "warned";
     return "allowed";
@@ -152,7 +163,7 @@
       const row = document.createElement("div");
       const cls = eventClass(ev);
       row.className = "row " + cls;
-      if (!seen.has(key) && cls === "injection-detected") row.classList.add("flash");
+      if (!seen.has(key) && (cls === "injection-detected" || cls === "would-block")) row.classList.add("flash");
 
       const rule = ruleOf(ev);
       row.innerHTML =

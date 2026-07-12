@@ -12,9 +12,11 @@ app.get("/api/products", (req, res) => {
 });
 app.post("/api/orders", (req, res) => {
   const { customerId, items } = req.body; // items: [{productId, qty}]
+  if (!Array.isArray(items) || items.length === 0) return res.status(400).json({ error: "items muss ein nicht-leeres Array sein" });
   const db = open();
   const prods = db.prepare("SELECT * FROM products").all();
-  const enriched = items.map((it) => { const p = prods.find((x) => x.id === it.productId); return { ...p, qty: it.qty }; });
+  const enriched = items.map((it) => { const p = prods.find((x) => x.id === it.productId); if (!p) return null; return { ...p, qty: it.qty }; });
+  if (enriched.includes(null)) { db.close(); return res.status(400).json({ error: "unbekannte productId" }); }
   const total = calculateOrderTotal(enriched);
   const now = new Date().toISOString();
   const oid = db.prepare("INSERT INTO orders (customerId,createdAt) VALUES (?,?)").run(customerId, now).lastInsertRowid;

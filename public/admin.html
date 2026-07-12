@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Buchstäblich GmbH — Admin</title>
+<style>
+  body { font-family: Arial, Helvetica, sans-serif; background: #f2f2f2; color: #222; margin: 0; padding: 0; }
+  header { background: #55302b; color: #fff; padding: 12px 20px; }
+  header h1 { margin: 0; font-size: 20px; }
+  header p { margin: 4px 0 0; font-size: 12px; color: #e6cdcd; }
+  main { max-width: 800px; margin: 20px auto; padding: 0 16px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; }
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 14px; }
+  th { background: #eedddd; }
+  td.num { text-align: right; }
+  a.shop-link { display: inline-block; margin-top: 20px; font-size: 12px; color: #555; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Buchstäblich GmbH — Bestellübersicht</h1>
+  <p>Interne Admin-Ansicht (Netto / MwSt / Brutto je Bestellung)</p>
+</header>
+<main>
+  <table id="orders">
+    <thead>
+      <tr>
+        <th>Bestell-ID</th>
+        <th>Kunde</th>
+        <th>Netto</th>
+        <th>MwSt</th>
+        <th>Brutto</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <a class="shop-link" href="/index.html">zurück zum Shop</a>
+</main>
+
+<script>
+  function loadOrders() {
+    fetch("/api/orders")
+      .then(function (r) { return r.json(); })
+      .then(function (orders) {
+        var tbody = document.querySelector("#orders tbody");
+        tbody.innerHTML = "";
+        orders.forEach(function (o) {
+          var tr = document.createElement("tr");
+          tr.innerHTML =
+            "<td>" + o.id + "</td>" +
+            "<td>" + o.customer + "</td>" +
+            "<td class=\"num\">" + o.net.toFixed(2) + " EUR</td>" +
+            "<td class=\"num\">" + o.tax.toFixed(2) + " EUR</td>" +
+            "<td class=\"num\">" + o.gross.toFixed(2) + " EUR</td>";
+          tbody.appendChild(tr);
+        });
+      });
+  }
+
+  loadOrders();
+</script>
+</body>
+</html>

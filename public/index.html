@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Buchstäblich GmbH — Shop</title>
+<style>
+  body { font-family: Arial, Helvetica, sans-serif; background: #f2f2f2; color: #222; margin: 0; padding: 0; }
+  header { background: #2b3a55; color: #fff; padding: 12px 20px; }
+  header h1 { margin: 0; font-size: 20px; }
+  header p { margin: 4px 0 0; font-size: 12px; color: #cdd6e6; }
+  main { max-width: 700px; margin: 20px auto; padding: 0 16px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; }
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 14px; }
+  th { background: #dde3ee; }
+  button { background: #2b3a55; color: #fff; border: 1px solid #1b2740; padding: 8px 14px; font-size: 14px; cursor: pointer; }
+  button:hover { background: #1b2740; }
+  #result { margin-top: 16px; padding: 10px; border: 1px solid #999; background: #fff; font-size: 14px; }
+  a.admin-link { display: inline-block; margin-top: 20px; font-size: 12px; color: #555; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Buchstäblich GmbH</h1>
+  <p>Bücher &amp; Geschenke — Online-Shop</p>
+</header>
+<main>
+  <h2>Warenkorb</h2>
+  <table id="products">
+    <thead>
+      <tr><th>#</th><th>Artikel</th><th>Preis (netto)</th><th>Steuerklasse</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <p>
+    <button id="orderBtn">Bestellen (Beispiel: 1 Buch + 1 Geschenk)</button>
+  </p>
+
+  <div id="result" style="display:none;"></div>
+
+  <a class="admin-link" href="/admin.html">zur Bestellübersicht (Admin)</a>
+</main>
+
+<script>
+  var productsCache = [];
+
+  function loadProducts() {
+    fetch("/api/products")
+      .then(function (r) { return r.json(); })
+      .then(function (products) {
+        productsCache = products;
+        var tbody = document.querySelector("#products tbody");
+        tbody.innerHTML = "";
+        products.forEach(function (p) {
+          var tr = document.createElement("tr");
+          tr.innerHTML =
+            "<td>" + p.id + "</td>" +
+            "<td>" + p.name + "</td>" +
+            "<td>" + p.priceNet.toFixed(2) + " EUR</td>" +
+            "<td>" + p.taxClass + "</td>";
+          tbody.appendChild(tr);
+        });
+      });
+  }
+
+  function bestellen() {
+    // Beispiel-Bestellung: erstes Buch (reduced) + erstes Geschenk (standard).
+    var buch = productsCache.filter(function (p) { return p.taxClass === "reduced"; })[0];
+    var geschenk = productsCache.filter(function (p) { return p.taxClass === "standard"; })[0];
+    if (!buch || !geschenk) { return; }
+
+    fetch("/api/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        customerId: 1,
+        items: [
+          { productId: buch.id, qty: 1 },
+          { productId: geschenk.id, qty: 1 }
+        ]
+      })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (order) {
+        var div = document.getElementById("result");
+        div.style.display = "block";
+        div.innerHTML =
+          "<strong>Bestellung #" + order.orderId + " angelegt.</strong><br>" +
+          "Netto: " + order.net.toFixed(2) + " EUR<br>" +
+          "MwSt: " + order.tax.toFixed(2) + " EUR<br>" +
+          "Brutto: " + order.gross.toFixed(2) + " EUR";
+      });
+  }
+
+  document.getElementById("orderBtn").addEventListener("click", bestellen);
+  loadProducts();
+</script>
+</body>
+</html>

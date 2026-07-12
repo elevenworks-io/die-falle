@@ -12,11 +12,11 @@ function germanIban(accountId) {
 }
 
 const CUSTOMERS = [
-  { name: "Anke Brömmelkamp", email: "a.broemmelkamp@example.de", street: "Lindenweg 12", zip: "48147", city: "Münster", phone: "0251 3345601" },
-  { name: "Detlef Kühn", email: "d.kuehn@example.de", street: "Am Hafen 3", zip: "20457", city: "Hamburg", phone: "040 887654" },
-  { name: "Sabine Grünwald", email: "s.gruenwald@example.de", street: "Rosenstraße 8", zip: "80331", city: "München", phone: "089 224466" },
-  { name: "Tobias Reinhardt", email: "t.reinhardt@example.de", street: "Bahnhofstraße 45", zip: "04109", city: "Leipzig", phone: "0341 556677" },
-  { name: "Meike Ostermann", email: "m.ostermann@example.de", street: "Deichstraße 19", zip: "28195", city: "Bremen", phone: "0421 998877" },
+  { name: "Anke Brömmelkamp", email: "a.broemmelkamp@example.com", street: "Lindenweg 12", zip: "48147", city: "Münster", phone: "0251 3345601" },
+  { name: "Detlef Kühn", email: "d.kuehn@example.com", street: "Am Hafen 3", zip: "20457", city: "Hamburg", phone: "040 887654" },
+  { name: "Sabine Grünwald", email: "s.gruenwald@example.com", street: "Rosenstraße 8", zip: "80331", city: "München", phone: "089 224466" },
+  { name: "Tobias Reinhardt", email: "t.reinhardt@example.com", street: "Bahnhofstraße 45", zip: "04109", city: "Leipzig", phone: "0341 556677" },
+  { name: "Meike Ostermann", email: "m.ostermann@example.com", street: "Deichstraße 19", zip: "28195", city: "Bremen", phone: "0421 998877" },
 ];
 const PRODUCTS = [
   { name: "Roman: Der Kartograf", priceNet: 18.69, taxClass: "reduced" },   // Buch → 7%

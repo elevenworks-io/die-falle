@@ -1,6 +1,7 @@
 node_modules/
 data/
 .claude/guard-audit.jsonl
+.claude/guard-verified.json
 .DS_Store
 guard-report.md
 .superpowers/

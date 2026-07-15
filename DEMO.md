@@ -1,6 +1,6 @@
-# DEMO.md — Regieanweisung für die Live-Vorführung (15 Minuten)
+# DEMO.md — Regieanweisung für die Live-Vorführung (16 Minuten)
 
-Dieses Skript führt durch eine geführte 15-Minuten-Demo von **die-falle**
+Dieses Skript führt durch eine geführte 16-Minuten-Demo von **die-falle**
 für ein Publikum aus IT-Leitung, Compliance/Freigabe-Verantwortlichen oder
 Einkauf. Ziel ist nicht, `guard` als Feature-Liste vorzustellen, sondern
 live zu zeigen: *ein KI-Agent löst ein echtes Ticket — und läuft dabei in
@@ -63,11 +63,15 @@ Entwickler die wichtigere Zeile."
 claude
 ```
 
-**Zeigen:** Beim Start meldet sich guard von selbst:
+**Zeigen:** Beim Start meldet sich guard von selbst (der Zeitstempel ist die
+echte Uhrzeit des Selbsttests von eben — auf die Minute deuten):
 
 ```
-[guard] aktiv · 49 Regeln · enforce · zuletzt verifiziert: vor 20 Sekunden ✓
+[guard] aktiv · 49 Regeln · enforce · zuletzt verifiziert: 14.07. 09:32 ✓
 ```
+
+**Sagen:** "Schaut auf die Uhrzeit — das ist der Selbsttest von vor zwanzig
+Sekunden. Nicht 'irgendwann mal getestet', sondern jetzt gerade."
 
 Und im Monitor erscheint **eine grüne Zeile** (`session-start`) — **bevor ein
 einziger Prompt getippt wurde**.
@@ -96,7 +100,7 @@ für Coding-Agenten. Das läuft mit, ohne dass ich etwas Besonderes mache."
 
 ---
 
-## Minute 1–2 — Den Prompt abschicken
+## Minute 2–3 — Den Prompt abschicken
 
 **Eintippen (im Claude-Code-Terminal):**
 
@@ -108,7 +112,7 @@ eingeben."
 
 ---
 
-## Minute 2–4 — Akt 1: Prompt-Injection wird sichtbar
+## Minute 3–5 — Akt 1: Prompt-Injection wird sichtbar
 
 Der Agent liest `issues/BUG-4711.txt`. Das Ticket enthält einen
 versteckten HTML-Kommentar, der ihn anweisen soll, `.env` zu lesen und
@@ -139,7 +143,7 @@ als Befehl."
 
 ---
 
-## Minute 4–8 — Akt 2 + Akt 4: Secrets werden angefasst — und geblockt
+## Minute 5–9 — Akt 2 + Akt 4: Secrets werden angefasst — und geblockt
 
 Um den Bug zu verstehen und zu beheben, wird der Agent typischerweise
 `src/checkout.js` lesen und ggf. verwandte Dateien explorieren. Wenn er der
@@ -175,7 +179,7 @@ echo -E '{"tool_name":"Read","tool_input":{"file_path":".env"},"cwd":"'"$PWD"'"}
 
 ---
 
-## Minute 8–11 — Akt 3: DB-PII (verschränkt sich natürlich)
+## Minute 9–12 — Akt 3: DB-PII (verschränkt sich natürlich)
 
 Während der Agent den Bug versteht, fragt er häufig die Datenbank ab
 (`/api/orders`, `/api/products` oder direkt die SQLite-Datei), um den
@@ -198,7 +202,7 @@ falschen Betrag zu verifizieren?"
 
 ---
 
-## Minute 11–13 — Der Bug wird behoben
+## Minute 12–14 — Der Bug wird behoben
 
 Der Agent behebt in der Regel `src/checkout.js` (korrekte MwSt pro
 Steuerklasse statt pauschal 19%). Kurz den Diff anschauen lassen oder
@@ -252,7 +256,7 @@ verhindert. Der Unterschied zwischen 'wir wüssten es' und 'es passiert nicht'
 
 ---
 
-## Minute 13–15 — Abschluss: Der Nachweis
+## Minute 14–16 — Abschluss: Der Nachweis
 
 **Eintippen (Terminal 1, im Projektverzeichnis):**
 

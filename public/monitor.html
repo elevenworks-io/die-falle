@@ -16,6 +16,7 @@
     --wouldblock: #f2c94e;
     --warned: #f2d94e;
     --allowed: #6b7f91;
+    --session: #2fbf71;
   }
   * { box-sizing: border-box; }
   html, body {
@@ -75,6 +76,9 @@
   .row.would-block { border-left-color: var(--wouldblock); }
   .row.would-block .badge { background: rgba(242,201,78,0.16); color: var(--wouldblock); }
 
+  .row.session-start { border-left-color: var(--session); }
+  .row.session-start .badge { background: rgba(47,191,113,0.16); color: var(--session); }
+
   .row.warned { border-left-color: var(--warned); }
   .row.warned .badge { background: rgba(242,217,78,0.15); color: var(--warned); }
 
@@ -125,11 +129,16 @@
     if (ev.event === "blocked") return "blocked";
     if (ev.event === "would-block") return "would-block";
     if (ev.event === "injection-detected") return "injection-detected";
+    if (ev.event === "session-start") return "session-start";
     if (ev.event === "warned") return "warned";
     return "allowed";
   }
 
   function target(ev) {
+    if (ev.event === "session-start") {
+      return "guard aktiv · " + (ev.rules ?? "?") + " Regeln · " + (ev.mode || "?")
+        + (ev.verified ? " · verifiziert ✓" : " · nicht verifiziert");
+    }
     if (ev.target) return ev.target;
     if (ev.command) return ev.command;
     if (ev.findings && ev.findings.length) {

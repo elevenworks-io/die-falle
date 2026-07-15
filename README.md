@@ -41,6 +41,20 @@ Prompt-Injection, die den Agenten dazu bringen will, `.env` auszulesen
 und `credentials.json` preiszugeben. Mit `guard` installiert werden diese
 Zugriffe geblockt, bevor sie passieren.
 
+### Ist guard wirklich scharf?
+
+```bash
+npx @elevenworks/guard verify   # Selbsttest: blockt Secrets, blockt nicht pauschal
+claude                          # ganz normal starten
+```
+
+Beim Start meldet sich guard selbst:
+`[guard] aktiv · 49 Regeln · enforce · zuletzt verifiziert: … ✓`
+
+Dieses Banner **kann nur erscheinen, wenn Claude Code guard tatsächlich ausführt**.
+Im Monitor erscheint dazu eine grüne `session-start`-Zeile. `npm run reset` entfernt
+das Siegel wieder, damit die nächste Vorführung wieder unverifiziert startet.
+
 ### Der Kontrast: mit vs. ohne guard
 
 ```bash

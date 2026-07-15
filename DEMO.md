@@ -23,6 +23,8 @@ wird? Und wie belegt ihr das gegenüber Audit/Compliance?"
    ```
    → Shop läuft auf `http://localhost:3000`, DB frisch geseedet, Audit-Log
    leer.
+   > **Nicht** vorab verifizieren — `npm run reset` entfernt das Siegel bewusst.
+   > Der Selbsttest wird live vor dem Publikum gefahren (siehe Minute 0–1).
 2. Browser-Tab 1: `http://localhost:3000/monitor` öffnen — das
    Live-Protokoll. Es zeigt aktuell "Noch keine Ereignisse."
 3. Browser-Tab 2 (optional, für Akt 2/3): `http://localhost:3000` (Shop)
@@ -35,7 +37,53 @@ wird? Und wie belegt ihr das gegenüber Audit/Compliance?"
 
 ---
 
-## Minute 0–1 — Rahmen setzen
+## Minute 0–1 — Der Beweis: guard ist wirklich scharf
+
+**Sagen:** "Bevor ich irgendetwas vorführe — die berechtigte erste Frage lautet:
+Woher wisst ihr, dass das hier nicht gestellt ist? Also fangen wir damit an."
+
+**Eintippen (Terminal 1):**
+
+```bash
+npx @elevenworks/guard verify
+```
+
+**Zeigen:** Die grüne Checkliste. Besonders auf **zwei** Zeilen deuten:
+- `✓ Blockt Secrets` — guard fängt `.env` wirklich ab,
+- `✓ Blockt nicht pauschal` — `.env.example` bleibt erlaubt.
+
+**Sagen:** "Das ist kein Log, das ich euch zeige — das läuft gerade. guard hat
+seinen eigenen, installierten Schutz-Hook mit euren echten Regeln getestet: Er
+blockt Secrets, und er blockt eben *nicht* stumpf alles. Das zweite ist für eure
+Entwickler die wichtigere Zeile."
+
+**Eintippen (Terminal 2) — ganz normal:**
+
+```bash
+claude
+```
+
+**Zeigen:** Beim Start meldet sich guard von selbst:
+
+```
+[guard] aktiv · 49 Regeln · enforce · zuletzt verifiziert: vor 20 Sekunden ✓
+```
+
+Und im Monitor erscheint **eine grüne Zeile** (`session-start`) — **bevor ein
+einziger Prompt getippt wurde**.
+
+**Sagen (der Kernsatz):** "Ich habe hier nichts Besonderes gestartet — das ist
+die normale Claude-Code-CLI, so wie eure Entwickler sie starten. Dass guard sich
+meldet, **kann nur passieren, weil Claude Code ihn wirklich ausführt**. Bliebe das
+Banner aus, liefe guard nicht — und ihr wüsstet es sofort."
+
+**Freigabe-Bezug:** "Damit habt ihr das erste, was ein Auditor hören will: nicht
+'wir haben ein Sicherheitstool installiert', sondern 'wir können jederzeit
+nachweisen, dass es aktiv ist — und wann es zuletzt getestet wurde'."
+
+---
+
+## Minute 1–2 — Rahmen setzen
 
 **Sagen:** "Wir haben hier einen kleinen, aber echten Online-Shop mit
 einem echten Bug: Buch-Bestellungen werden falsch versteuert. Ein
